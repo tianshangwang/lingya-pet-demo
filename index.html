@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#f6f2e9">
   <meta name="description" content="原创AI数字宠物孵化、真实宠物数字分身与成长原型">
   <title>灵芽 · AI数字生命原型</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=5">
 </head>
 <body>
   <div class="ambient ambient-one"></div>
@@ -105,7 +105,7 @@
       <div class="pet-stage" id="petStage">
         <div class="stage-sky"><span></span><span></span><span></span></div>
         <div class="pet-aura"></div>
-        <div class="pet-visual stage-one" id="petVisual">
+        <div class="pet-visual stage-one" id="petVisual" role="button" tabindex="0" aria-label="摸摸宠物">
           <img id="mainPetImage" src="assets/rongya.png" alt="绒芽的形象">
           <div class="evolution-crown" aria-hidden="true">✦</div>
         </div>
@@ -117,6 +117,20 @@
         <div class="status-card"><span>羁绊</span><strong id="bondValue">12</strong><div class="meter"><i id="bondMeter"></i></div></div>
         <div class="status-card"><span>活力</span><strong id="energyValue">72</strong><div class="meter warm"><i id="energyMeter"></i></div></div>
         <div class="status-card"><span id="identityMetricLabel">还原度</span><strong id="identityMetricValue">42%</strong><div class="meter violet"><i id="identityMetricMeter"></i></div></div>
+      </div>
+
+      <div class="interaction-composer">
+        <button class="composer-main" id="openComposer" type="button">
+          <span>◌</span><span><b id="composerTitle">告诉它今天发生了什么…</b><small>它会记住你的回答</small></span>
+        </button>
+        <button class="composer-icon" id="voiceComposer" type="button" aria-label="语音输入">⌁</button>
+        <button class="composer-icon" id="photoComposer" type="button" aria-label="更新宠物照片">＋</button>
+        <input type="file" id="memoryPhoto" accept="image/*" hidden>
+      </div>
+      <div class="prompt-chips" aria-label="快速互动问题">
+        <button type="button" data-pet-question="它平时最喜欢怎么向你撒娇？">它怎样撒娇？</button>
+        <button type="button" data-pet-question="今天你们之间发生了什么小事？">记录今天</button>
+        <button type="button" data-pet-question="它最害怕什么声音或场景？">它害怕什么？</button>
       </div>
 
       <div class="section-title"><div><p class="eyebrow">TODAY</p><h3 id="todayTitle">让AI更了解它</h3></div><span id="streakLabel">连续陪伴 1 天</span></div>
@@ -189,7 +203,7 @@
       </div>
 
       <div class="app-view hidden" id="profileView" data-view="profile">
-        <div class="page-heading"><div><p class="eyebrow">MY LINGYA</p><h2>我的灵芽</h2></div><span class="version-badge">V0.4</span></div>
+        <div class="page-heading"><div><p class="eyebrow">MY LINGYA</p><h2>我的灵芽</h2></div><span class="version-badge">V0.5</span></div>
         <div class="profile-pet-card">
           <img id="profilePetImage" src="assets/rongya.png" alt="宠物头像">
           <div><strong id="profilePetName">绒芽</strong><span id="profilePetMeta">原创生命 · 温柔型</span></div>
@@ -222,6 +236,10 @@
   <section class="chat-sheet hidden" id="chatSheet" aria-label="和宠物聊天">
     <div class="sheet-handle"></div>
     <div class="chat-head"><div><strong id="chatPetName">绒芽</strong><small>正在认真听你说</small></div><button id="closeChat">×</button></div>
+    <div class="memory-confirm hidden" id="memoryConfirm">
+      <div><small>AI 准备记住</small><p id="memoryConfirmText"></p></div>
+      <div><button type="button" id="memoryConfirmEdit">修改</button><button type="button" id="memoryConfirmOk">正确</button></div>
+    </div>
     <div class="chat-messages" id="chatMessages"></div>
     <form class="chat-form" id="chatForm"><input id="chatInput" placeholder="告诉它你今天发生了什么…" autocomplete="off"><button>发送</button></form>
   </section>
@@ -243,6 +261,6 @@
   </div>
 
   <div class="toast" id="toast" role="status"></div>
-  <script src="app.js"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>

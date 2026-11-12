@@ -16,9 +16,12 @@ const chatMessages = $('#chatMessages');
 const modalBackdrop = $('#modalBackdrop');
 const toast = $('#toast');
 const bottomNav = $('#bottomNav');
+const memoryPhoto = $('#memoryPhoto');
+const memoryConfirm = $('#memoryConfirm');
 
 let selectedMode = 'original';
 let pendingPhoto = '';
+let pendingConfirmedMemory = '';
 let state = loadState();
 let activeView = 'home';
 let activeMemoryFilter = 'all';
@@ -197,6 +200,7 @@ function render() {
   $('#mainPetImage').src = image;
   $('#mainPetImage').alt = `${state.petName}的形象`;
   $('#chatPetName').textContent = state.petName;
+  $('#composerTitle').textContent = `告诉${state.petName}今天发生了什么…`;
   $('#petVisual').className = `pet-visual stage-${['one','two','three'][stage.num - 1]}${state.mode === 'real' ? ' user-photo' : ''}`;
   $('#bondValue').textContent = state.bond;
   $('#energyValue').textContent = state.energy;
@@ -408,11 +412,96 @@ function openChat() {
 function closeChat() {
   chatSheet.classList.add('hidden');
   chatBackdrop.classList.add('hidden');
+  memoryConfirm.classList.add('hidden');
 }
 
 $('#closeChat').addEventListener('click', closeChat);
 chatBackdrop.addEventListener('click', closeChat);
 $('#moodBubble').addEventListener('click', openChat);
+
+$('#openComposer').addEventListener('click', () => {
+  $('#chatInput').placeholder = `告诉${state.petName}今天发生了什么…`;
+  openChat();
+});
+
+function askPetQuestion(question) {
+  if (!question) return;
+  state.messages.push({ role: 'pet', text: question });
+  state.messages = state.messages.slice(-24);
+  saveState();
+  renderChat();
+  $('#chatInput').placeholder = '输入你的回答…';
+  openChat();
+}
+
+$$('[data-pet-question]').forEach(button => button.addEventListener('click', () => {
+  const question = button.dataset.petQuestion.replace('它', state.petName);
+  askPetQuestion(question);
+}));
+
+function petReact() {
+  const visual = $('#petVisual');
+  visual.classList.remove('pet-reacting');
+  void visual.offsetWidth;
+  visual.classList.add('pet-reacting');
+  $('#moodBubble').textContent = state.mode === 'real'
+    ? `我认得你的手。${state.ownerName}，再摸摸我吧。`
+    : `好舒服呀，${state.ownerName}。我记住这个温度了。`;
+  state.bond = clamp(state.bond + 1);
+  $('#bondValue').textContent = state.bond;
+  $('#bondMeter').style.width = `${state.bond}%`;
+  saveState();
+  clearTimeout(petReact.timer);
+  petReact.timer = setTimeout(() => visual.classList.remove('pet-reacting'), 620);
+}
+
+$('#petVisual').addEventListener('click', petReact);
+$('#petVisual').addEventListener('keydown', event => {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    petReact();
+  }
+});
+
+$('#voiceComposer').addEventListener('click', () => {
+  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!Recognition) return notify('当前浏览器暂不支持语音输入，可直接打字告诉它');
+  const recognition = new Recognition();
+  recognition.lang = 'zh-CN';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+  recognition.onstart = () => { openChat(); notify('正在听，请说…'); };
+  recognition.onresult = event => {
+    $('#chatInput').value = event.results[0][0].transcript;
+    $('#chatInput').focus();
+    notify('已转成文字，确认后发送');
+  };
+  recognition.onerror = () => notify('没有听清，再试一次或直接输入文字');
+  recognition.start();
+});
+
+$('#photoComposer').addEventListener('click', () => {
+  if (state.mode !== 'real') return notify('原创生命暂不支持替换照片');
+  memoryPhoto.click();
+});
+
+memoryPhoto.addEventListener('change', async () => {
+  const file = memoryPhoto.files?.[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) return notify('请选择图片文件');
+  try {
+    state.photo = await resizeImage(file, 720, .82);
+    state.memories.push(`第${state.day}天，主人为${state.petName}更新了一张照片`);
+    state.fidelity = clamp(state.fidelity + 3);
+    saveState();
+    render();
+    notify('新照片已经更新到数字档案');
+  } catch {
+    notify('照片读取失败，请换一张再试');
+  } finally {
+    memoryPhoto.value = '';
+  }
+});
 
 function renderChat() {
   chatMessages.innerHTML = state.messages.map(message => `<div class="message ${message.role}">${escapeHtml(message.text)}</div>`).join('');
@@ -434,6 +523,7 @@ $('#chatForm').addEventListener('submit', (event) => {
   saveState();
   render();
   openChat();
+  if (learned) showMemoryConfirm(learned);
 });
 
 function learnMemory(text) {
@@ -443,6 +533,9 @@ function learnMemory(text) {
     [/(?:它|他|她|[^，。]{1,8})(?:总是|经常|习惯)(.{1,22})/, match => `${state.petName}的习惯：${match[1]}`],
     [/(?:今天|有一次|以前)(.{1,28})/, match => `关于${state.petName}的故事：${match[0]}`]
   ] : [
+    [/(?:它|他|她|[^，。]{1,8})喜欢(.{1,18})/, match => `${state.petName}喜欢${match[1]}`],
+    [/(?:它|他|她|[^，。]{1,8})害怕(.{1,18})/, match => `${state.petName}害怕${match[1]}`],
+    [/(?:它|他|她|[^，。]{1,8})(?:总是|经常|习惯)(.{1,22})/, match => `${state.petName}的习惯：${match[1]}`],
     [/我喜欢(.{1,16})/, match => `${state.ownerName}喜欢${match[1]}`],
     [/我今天(.{1,22})/, match => `${state.ownerName}今天${match[1]}`],
     [/我的生日是(.{1,12})/, match => `${state.ownerName}的生日是${match[1]}`],
@@ -453,16 +546,51 @@ function learnMemory(text) {
     const match = text.match(pattern);
     if (match) {
       const memory = format(match).replace(/[。！!？?]$/, '');
-      if (!state.memories.includes(memory)) state.memories.push(memory);
-      return true;
+      if (!state.memories.includes(memory)) {
+        state.memories.push(memory);
+        return memory;
+      }
+      return '';
     }
   }
   if (state.mode === 'real' && text.length >= 6) {
-    state.memories.push(`主人补充：${text.replace(/[。！!？?]$/, '')}`);
-    return true;
+    const memory = `主人补充：${text.replace(/[。！!？?]$/, '')}`;
+    state.memories.push(memory);
+    return memory;
   }
-  return false;
+  return '';
 }
+
+function showMemoryConfirm(memory) {
+  pendingConfirmedMemory = memory;
+  $('#memoryConfirmText').textContent = memory;
+  memoryConfirm.classList.remove('hidden');
+}
+
+$('#memoryConfirmOk').addEventListener('click', () => {
+  pendingConfirmedMemory = '';
+  memoryConfirm.classList.add('hidden');
+  notify('已经记进它的长期档案');
+});
+
+$('#memoryConfirmEdit').addEventListener('click', () => {
+  if (!pendingConfirmedMemory) return;
+  const index = state.memories.lastIndexOf(pendingConfirmedMemory);
+  if (index >= 0) state.memories.splice(index, 1);
+  if (state.mode === 'real') state.fidelity = clamp(state.fidelity - 5);
+  let editable = pendingConfirmedMemory.replace(/^主人补充：/, '');
+  [`${state.petName}喜欢`, `${state.petName}害怕`, `${state.petName}的习惯：`].forEach(prefix => {
+    if (editable.startsWith(prefix)) editable = editable.slice(prefix.length);
+  });
+  $('#chatInput').value = editable;
+  pendingConfirmedMemory = '';
+  memoryConfirm.classList.add('hidden');
+  saveState();
+  renderMemories();
+  renderIdentityPage();
+  $('#chatInput').focus();
+  notify('请修改后重新发送');
+});
 
 function agentReply(text) {
   const name = state.ownerName;
@@ -472,6 +600,9 @@ function agentReply(text) {
     if (/总是|经常|习惯|每次/.test(text)) return `这个小习惯很有辨识度。下次回应你时，我会试着更像${state.petName}。`;
     return `我把这段关于${state.petName}的故事收好了。你讲得越多，数字世界里的我就越接近真实的它。`;
   }
+  if (/(?:它|他|她).*(?:喜欢|爱吃|最爱)/.test(text)) return `原来这是我的偏好呀。我已经把它收进自己的性格档案了。`;
+  if (/(?:它|他|她).*(?:害怕|讨厌|不喜欢)/.test(text)) return `我记住这个边界了。下次遇到它，我会知道怎样照顾自己。`;
+  if (/(?:它|他|她).*(?:总是|经常|习惯|每次)/.test(text)) return `这个小习惯让我变得更独特了。谢谢你认真观察我。`;
   const traitLines = {
     温柔: [`我在听，${name}。不用急着把一切都说清楚。`, `这件事对你一定很重要，我会帮你记住。`],
     好奇: [`真的？然后呢？我想把今天的故事听完整。`, `如果明天再遇到这件事，你想怎么做？`],
@@ -516,8 +647,7 @@ function growthShareText() {
 
 function openTrainingChat() {
   switchView('home');
-  $('#chatInput').placeholder = $('#trainingQuestion')?.textContent || `告诉AI更多关于${state.petName}的事…`;
-  openChat();
+  askPetQuestion($('#trainingQuestion')?.textContent || `再告诉我一些关于${state.petName}的事吧。`);
 }
 
 $('#missionButton').addEventListener('click', openTrainingChat);
