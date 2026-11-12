@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f6f2e9">
+  <meta name="description" content="原创AI数字宠物孵化、真实宠物数字分身与成长原型">
+  <title>灵芽 · AI数字生命原型</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="灵芽首页">
+        <span class="brand-mark">芽</span>
+        <span><strong>灵芽</strong><small>AI LIFE LAB</small></span>
+      </a>
+      <button class="icon-button" id="settingsButton" aria-label="设置">•••</button>
+    </header>
+
+    <section class="intro" id="introSection">
+      <p class="eyebrow">真实宠物 · AI数字分身</p>
+      <h1>在数字世界，<br><em>有另一个它。</em></h1>
+      <p class="intro-copy">上传照片，告诉AI它的性格、习惯和故事。不是复制一个外形，而是让数字分身在相处中越来越了解它、越来越像它。</p>
+
+      <div class="mode-grid">
+        <button class="mode-card real featured" data-mode="real">
+          <span class="mode-index">01</span>
+          <span class="recommended">推荐体验</span>
+          <span class="photo-stack"><span>＋</span></span>
+          <strong>创建它的数字分身</strong>
+          <small>上传照片 · 还原性格 · 留下共同记忆</small>
+        </button>
+        <button class="mode-card original" data-mode="original">
+          <span class="mode-index">02</span>
+          <span class="egg-orbit"><span class="egg">✦</span></span>
+          <strong>体验原创AI生命</strong>
+          <small>快速体验 · 互动养成 · 三段进化</small>
+        </button>
+      </div>
+
+      <div class="privacy-note"><span>◉</span> 原型数据与宠物照片仅保存在当前浏览器</div>
+    </section>
+
+    <section class="setup-panel hidden" id="setupPanel" aria-live="polite">
+      <button class="back-button" id="backButton">← 返回</button>
+      <div class="setup-copy">
+        <p class="eyebrow" id="setupEyebrow">原创生命孵化</p>
+        <h2 id="setupTitle">教AI认识它</h2>
+        <p id="setupDescription">三个答案会影响它最初的性格，但未来由你们共同书写。</p>
+      </div>
+
+      <form id="petForm">
+        <div class="upload-zone hidden" id="uploadZone">
+          <input type="file" id="petPhoto" accept="image/*" hidden>
+          <button type="button" class="photo-picker" id="photoPicker">
+            <img id="photoPreview" alt="宠物照片预览">
+            <span id="photoPlaceholder"><b>＋</b>上传一张宠物照片<small>照片仅保存在本机</small></span>
+          </button>
+        </div>
+
+        <label>它叫什么？
+          <input id="petName" maxlength="10" placeholder="例如：绒芽" required>
+        </label>
+        <label class="real-only hidden">它是什么宠物？
+          <select id="petSpecies">
+            <option value="猫">猫</option>
+            <option value="狗">狗</option>
+            <option value="鱼">鱼</option>
+            <option value="鸟">鸟</option>
+            <option value="其他">其他</option>
+          </select>
+        </label>
+        <label class="real-only hidden">它最特别的习惯
+          <input id="petHabit" maxlength="30" placeholder="例如：睡前一定要踩奶">
+        </label>
+        <label class="real-only hidden">它最喜欢什么
+          <input id="petFavorite" maxlength="30" placeholder="例如：冻干、纸箱和晒太阳">
+        </label>
+        <fieldset>
+          <legend>最像它的气质</legend>
+          <div class="choice-row">
+            <label class="choice"><input type="radio" name="trait" value="温柔" checked><span>温柔<small>会照顾情绪</small></span></label>
+            <label class="choice"><input type="radio" name="trait" value="好奇"><span>好奇<small>喜欢探索世界</small></span></label>
+            <label class="choice"><input type="radio" name="trait" value="勇敢"><span>勇敢<small>会鼓励你行动</small></span></label>
+          </div>
+        </fieldset>
+        <label>你希望它怎么称呼你？
+          <input id="ownerName" maxlength="10" placeholder="例如：阿丹" required>
+        </label>
+        <button class="primary-button" type="submit" id="createButton">开始孵化 <span>→</span></button>
+      </form>
+    </section>
+
+    <section class="pet-home hidden" id="petHome">
+      <div class="app-view" id="homeView" data-view="home">
+      <div class="home-heading">
+        <div><p class="eyebrow" id="dayLabel">相遇第 1 天</p><h2><span id="petNameDisplay">绒芽</span><small id="stageName">初生期</small></h2></div>
+        <button class="share-button" id="shareButton">成长卡 ↗</button>
+      </div>
+
+      <div class="pet-stage" id="petStage">
+        <div class="stage-sky"><span></span><span></span><span></span></div>
+        <div class="pet-aura"></div>
+        <div class="pet-visual stage-one" id="petVisual">
+          <img id="mainPetImage" src="assets/rongya.png" alt="绒芽的形象">
+          <div class="evolution-crown" aria-hidden="true">✦</div>
+        </div>
+        <button class="mood-bubble" id="moodBubble">今天也想多了解你一点。</button>
+        <div class="stage-ground"></div>
+      </div>
+
+      <div class="status-grid">
+        <div class="status-card"><span>羁绊</span><strong id="bondValue">12</strong><div class="meter"><i id="bondMeter"></i></div></div>
+        <div class="status-card"><span>活力</span><strong id="energyValue">72</strong><div class="meter warm"><i id="energyMeter"></i></div></div>
+        <div class="status-card"><span id="identityMetricLabel">还原度</span><strong id="identityMetricValue">42%</strong><div class="meter violet"><i id="identityMetricMeter"></i></div></div>
+      </div>
+
+      <div class="section-title"><div><p class="eyebrow">TODAY</p><h3 id="todayTitle">让AI更了解它</h3></div><span id="streakLabel">连续陪伴 1 天</span></div>
+      <div class="action-grid">
+        <button data-action="feed"><span>◒</span><b id="feedLabel">记饮食</b><small id="feedHint">还原度 +2</small></button>
+        <button data-action="play"><span>⌁</span><b id="playLabel">记互动</b><small id="playHint">羁绊 +5</small></button>
+        <button data-action="explore"><span>⌖</span><b id="exploreLabel">补特征</b><small id="exploreHint">教AI认识它</small></button>
+        <button data-action="talk"><span>◌</span><b>聊故事</b><small>留下记忆</small></button>
+      </div>
+
+      <div class="daily-mission">
+        <div class="mission-icon">✓</div>
+        <div><p class="eyebrow">DAILY TRAINING</p><h3 id="missionTitle">今天再教AI认识它一点</h3><p id="missionCopy">补充一个习惯或故事，还原度会继续提高。</p></div>
+        <button id="missionButton">去完成</button>
+      </div>
+
+      <div class="identity-card" id="identityCard">
+        <div class="identity-score"><strong id="fidelityScore">42%</strong><small>性格还原度</small></div>
+        <div><p class="eyebrow">DIGITAL IDENTITY</p><h3>AI正在学习“它是谁”</h3><div class="identity-tags" id="identityTags"></div></div>
+      </div>
+
+      <div class="memory-card">
+        <div class="section-title compact"><div><p class="eyebrow">MEMORY</p><h3>它记得的你</h3></div><span id="memoryCount">1 条</span></div>
+        <div id="memoryList" class="memory-list"></div>
+      </div>
+
+      <div class="evolution-card">
+        <div><p class="eyebrow">NEXT EVOLUTION</p><h3 id="evolutionTitle">距离「芽茸期」还有 2 天</h3><p id="evolutionCopy">多互动、多探索，它会长成不同的样子。</p></div>
+        <div class="evolution-orbs"><i class="active"></i><i></i><i></i></div>
+      </div>
+
+      <button class="demo-button" id="advanceDay">演示：推进一天</button>
+      </div>
+
+      <div class="app-view hidden" id="memoriesView" data-view="memories">
+        <div class="page-heading"><div><p class="eyebrow">MEMORY TIMELINE</p><h2>共同记忆</h2></div><span id="memoryTotalBadge">0 条</span></div>
+        <p class="page-lead">不是简单保存聊天，而是把关于它的习惯、偏好和故事，慢慢整理成一生的档案。</p>
+        <form class="quick-memory-form" id="quickMemoryForm">
+          <textarea id="quickMemoryInput" maxlength="120" placeholder="记录今天发生的小事，例如：它第一次主动趴在我腿上睡着了…"></textarea>
+          <div><span id="quickMemoryHint">AI会自动提取关键特征</span><button type="submit">保存记忆</button></div>
+        </form>
+        <div class="memory-filter" role="tablist">
+          <button class="active" data-memory-filter="all">全部</button>
+          <button data-memory-filter="trait">性格习惯</button>
+          <button data-memory-filter="story">共同故事</button>
+        </div>
+        <div class="timeline" id="memoryTimeline"></div>
+      </div>
+
+      <div class="app-view hidden" id="identityView" data-view="identity">
+        <div class="page-heading"><div><p class="eyebrow">DIGITAL IDENTITY</p><h2>它是谁</h2></div><span id="identityStageBadge">初识期</span></div>
+        <div class="identity-hero">
+          <img id="identityPetImage" src="assets/rongya.png" alt="宠物数字身份形象">
+          <div class="identity-ring"><strong id="identityPageScore">42%</strong><small>综合还原度</small></div>
+        </div>
+        <div class="identity-summary">
+          <p id="identitySummaryText">AI正在通过外形、性格、习惯与故事逐渐认识它。</p>
+          <div class="identity-tags" id="identityPageTags"></div>
+        </div>
+        <div class="dimension-list">
+          <div><span>外形档案</span><b id="appearanceScore">60%</b><i><em id="appearanceMeter"></em></i></div>
+          <div><span>性格习惯</span><b id="personalityScore">42%</b><i><em id="personalityMeter"></em></i></div>
+          <div><span>共同记忆</span><b id="memoryScore">20%</b><i><em id="memoryMeter"></em></i></div>
+        </div>
+        <div class="training-card">
+          <p class="eyebrow">NEXT QUESTION</p>
+          <h3 id="trainingQuestion">它开心的时候，最明显的动作是什么？</h3>
+          <button id="answerTraining">告诉AI答案 <span>→</span></button>
+        </div>
+      </div>
+
+      <div class="app-view hidden" id="profileView" data-view="profile">
+        <div class="page-heading"><div><p class="eyebrow">MY LINGYA</p><h2>我的灵芽</h2></div><span class="version-badge">V0.4</span></div>
+        <div class="profile-pet-card">
+          <img id="profilePetImage" src="assets/rongya.png" alt="宠物头像">
+          <div><strong id="profilePetName">绒芽</strong><span id="profilePetMeta">原创生命 · 温柔型</span></div>
+          <button data-nav-target="identity">查看身份</button>
+        </div>
+        <div class="settings-list">
+          <button id="exportData"><span>⇩</span><div><b>导出宠物档案</b><small>JSON格式，方便以后迁移数据</small></div><i>›</i></button>
+          <button id="platformShare"><span>↗</span><div><b>分享成长故事</b><small id="platformLabel">生成适合微信/抖音的分享文案</small></div><i>›</i></button>
+          <button id="privacyInfo"><span>◉</span><div><b>隐私与数据</b><small>照片和记录只保存在当前浏览器</small></div><i>›</i></button>
+        </div>
+        <div class="platform-card">
+          <p class="eyebrow">PLATFORM READY</p><h3>微信、抖音接入准备</h3>
+          <div><span class="ready">✓</span>移动端自适应与分享文案</div>
+          <div><span class="ready">✓</span>宠物档案统一数据结构</div>
+          <div><span>○</span>微信/抖音账号登录与云同步</div>
+          <div><span>○</span>小程序支付、订阅与内容审核</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav hidden" id="bottomNav" aria-label="主要导航">
+    <button class="active" data-nav="home"><span>⌂</span><b>陪伴</b></button>
+    <button data-nav="memories"><span>◫</span><b>记忆</b><i id="navMemoryDot"></i></button>
+    <button data-nav="identity"><span>✦</span><b>身份</b></button>
+    <button data-nav="profile"><span>◎</span><b>我的</b></button>
+  </nav>
+
+  <div class="sheet-backdrop hidden" id="chatBackdrop"></div>
+  <section class="chat-sheet hidden" id="chatSheet" aria-label="和宠物聊天">
+    <div class="sheet-handle"></div>
+    <div class="chat-head"><div><strong id="chatPetName">绒芽</strong><small>正在认真听你说</small></div><button id="closeChat">×</button></div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <form class="chat-form" id="chatForm"><input id="chatInput" placeholder="告诉它你今天发生了什么…" autocomplete="off"><button>发送</button></form>
+  </section>
+
+  <div class="modal-backdrop hidden" id="modalBackdrop">
+    <section class="share-modal" id="shareModal">
+      <button class="modal-close" id="modalClose">×</button>
+      <p class="eyebrow">成长纪念卡</p>
+      <div class="share-card-canvas">
+        <div class="share-date" id="shareDate">DAY 01</div>
+        <img id="shareImage" src="assets/rongya.png" alt="宠物成长形象">
+        <h3 id="sharePetName">绒芽</h3>
+        <p id="shareQuote">“谢谢你让我来到这个世界。”</p>
+        <div class="share-stats" id="shareStats">羁绊 12 · 温柔型 · 初生期</div>
+        <small>灵芽 AI LIFE LAB</small>
+      </div>
+      <button class="primary-button" id="copyShare">复制成长文案 <span>↗</span></button>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>
